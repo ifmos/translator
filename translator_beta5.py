@@ -12,13 +12,22 @@ import os
 
 #判断文件是否存在
 user = ''
-file = 'username.txt'
+userlang = ''
+version1 = ['本地词典没有查询结果！', 'Please input some contents which are needed to translated', '没网啦！', '输入不能为空！', '请输入你的名字~', '好了~', '暂时不想使用~', '单词翻译', '将单词', '翻译为', '欢迎使用', '翻译', '段落', '退出', '段落翻译', '开始翻译', '返回单词', '退出程序', '好了！']
+version2 = ['There\'s no local translation!', '请输入需要翻译的内容！', 'Please connect the Internet!', 'Please input something!', 'What\'s your name?', 'OK~', 'Not now', 'Words Translator', 'Translate', 'To', 'Welcome', 'Go!', 'More', 'Exit', 'Text Translator', 'Let\'s Begin', 'Back to Words', 'Exit', 'OK~']
+version = []
+file = 'user.txt'
+read = ''
+
 if os.path.exists(file):
-	with open('username.txt', 'r') as r:
-		user = r.read()	#若文件存在则读取用户名
+	with open(file, 'r', encoding='gbk') as r:
+		read = r.read().split(' ') #user文件含有两个属性，分别为用户名和用户使用的语言
+		if read != ['']:
+			user = read[0] 
+			userlang = read[1]
 		r.close()
 else:
-	with open('username.txt', 'w') as w:
+	with open(file, 'w') as w:
 		w.close()
 	user = '' # 不存在则令用户名为空
 
@@ -36,18 +45,30 @@ for x in range(0, len(lines)):
 		
 		
 p = 0
-def local(word):
+def langseletion():	#语言选择窗口
+	lang.destroy()
+	global version, userlang
+	if langs.get() == 1:
+		version = version1
+		userlang = '中文'
+		# Button(lang, text='好了！', command=lang.destroy).pack()
+	if langs.get() == 2:
+		version = version2
+		userlang = 'English'
+		# Button(lang, text='OK~', command=lang.destroy).pack()
+
+def local(word):	#本地查询功能
 	if word in dictionary.keys():
 		return dictionary[word]
 	else:
-		return '本地词典没有查询结果！'
+		return '%s' % version[0]
 
 def getname(event=None):
 	name.destroy()
 	global p, user
 	user = name1.get() #写入用户名， 后期加入用户名列表
-	with open('username.txt', 'w') as n:
-		n.write(user)
+	with open(file, 'w') as n:
+		n.write('%s %s'%(user,userlang))
 		n.close()
 	if user != '':
 		p = 1
@@ -75,7 +96,7 @@ def return2words():
 def words(event=None):	#单词翻译
 	content = text1.get()
 	if content == '':
-		content = 'Please input some contents which are needed to translated'
+		content = '%s' % version[1]
 	req = translate(content)
 	
 	try:	#判断网络连通性
@@ -97,13 +118,13 @@ def paras():	#段落翻译
 	content = text3.get(1.0, END)
 	text4.delete(0.0, END)
 	if content == '':
-		content = "Please input something!"
+		content = '%s' % version[3]
 	req = translate(content)
 	try:	#判断网络连通性
 		response = urllib.request.urlopen(req)
 	except URLError as e:
 		if hasattr(e, 'reason'):
-			text4.insert(INSERT, '%s, 没网啦！\(^o^)/~' % user)
+			text4.insert(INSERT, '%s, %s\(^o^)/~' % (user, version[2]))
 	else:
 		html = response.read().decode('utf8')
 
@@ -116,7 +137,7 @@ def paras():	#段落翻译
 					text4.insert(INSERT,j['tgt'] + '\n')
 					cloum+=1
 		else:
-			text4.insert(INSERT, '输入不能为空！')
+			text4.insert(INSERT, '%s' % version[3])
 		# text4.insert(INSERT, target)
 	
 def translate(content): #翻译entry1的内容
@@ -148,32 +169,50 @@ def translate(content): #翻译entry1的内容
 	
 	return req
 
-if user == '':
+
+
+if 	userlang == '':
+	lang = Tk()
+	lang.title('Hi~')
+	langs = IntVar()
+	Radiobutton(lang, text='中文', variable=langs, value=1).grid(row=0, column=0)
+	Radiobutton(lang, text='English', variable=langs, value=2).grid(row=0, column=1)
+	
+	Button(lang, text='OK', command=langseletion).grid(row=0, column=2)
+	lang.mainloop()
+	
+elif userlang == '中文':
+	version = version1
+
+elif userlang == 'English':
+	version = version2
+
+if user == '' and userlang != '':
 	name = Tk()
-	name.title('请输入你的名字~')
+	name.title('%s' % version[4])
 
 	name1 = StringVar()
 
 	entry = Entry(name, textvariable=name1, width=40)	
 	entry.pack()
 
-	Button(name, text='好了~', command=getname).pack(side=LEFT)
-	Button(name, text='暂时不想使用~', command=name.destroy).pack()
+	Button(name, text='%s' % version[5], command=getname).pack(side=LEFT)
+	Button(name, text='%s' % version[6], command=name.destroy).pack()
 
 	entry.bind('<Return>', getname)
 
 	name.mainloop()
 	
-while p in range(0,3):		
+while p in range(0,3) and userlang != '':		
 
 	if user != '':	#如果用户名不为空，则开始进行翻译
 		
 		root = Tk()	
 
-		root.title('单词翻译 for %s  by Mos'  % user)
+		root.title('%s for %s  by Mos'  % (version[7],user))
 
-		Label(root, text='将单词', justify=LEFT).grid(row=0, column=0)
-		Label(root, text='翻译为', justify=LEFT).grid(row=1, column=0)
+		Label(root, text='%s' % version[8], justify=LEFT).grid(row=0, column=0)
+		Label(root, text='%s' % version[9], justify=LEFT).grid(row=1, column=0)
 
 		text1 = StringVar()
 		text2 = StringVar()
@@ -183,28 +222,28 @@ while p in range(0,3):
 
 		entry1.grid(row=0, column=1)
 
-		text2.set('欢迎%s使用O(∩_∩)O~~'  % user)
+		text2.set('%s, %sO(∩_∩)O~~'  % (user,version[10]))
 
 		entry1.bind('<Key-Return>', words)
 
 
-		Button(root, text='翻译', command=words, justify=RIGHT).grid(row=0, column=2)
-		Button(root, text='段落', command=parav, justify=RIGHT).grid(row=0, rowspan=2, column=3)
-		Button(root, text='退出', command=quitwords, fg='red', justify=RIGHT).grid(row=1, column=2)
+		Button(root, text='%s'%version[11], command=words, justify=RIGHT).grid(row=0, column=2)
+		Button(root, text='%s'%version[12], command=parav, justify=RIGHT).grid(row=0, rowspan=2, column=3)
+		Button(root, text='%s'%version[13], command=quitwords, fg='red', justify=RIGHT).grid(row=1, column=2)
 		root.mainloop()
 
 	if p == 1:
 		para = Tk()
-		para.title('段落翻译 for %s by Mos'  % user)
+		para.title('%s for %s by Mos'  % (version[14], user))
 
 		text3=Text(para,width=80,height=10,padx=10,pady=10,fg='black',font=('Comic Sans MS', 10))
 		text4=Text(para,width=80,height=10,padx=10,pady=10,fg='blue',font=('Comic Sans MS', 10))
 
 		text3.pack()
 		framep = Frame(para)
-		Button(framep, text='开始翻译', command=paras).pack(side=LEFT)
-		Button(framep, text='返回单词', command=return2words).pack(side=LEFT)
-		Button(framep, text='退出程序', command=quitparas).pack(side=RIGHT)
+		Button(framep, text='%s'%version[15], command=paras).pack(side=LEFT)
+		Button(framep, text='%s'%version[16], command=return2words).pack(side=LEFT)
+		Button(framep, text='%s'%version[17], command=quitparas).pack(side=RIGHT)
 		framep.pack()
 		text4.pack()
 
