@@ -1,4 +1,6 @@
 *.py[cod]
+user.txt
+*.spec
 
 # C extensions
 *.so
