@@ -1,4 +1,15 @@
 #coding:utf-8
+'''
+本工具调用了有道文本翻译的接口，劫持了输入和输出端，并添加了一些人性化小工具
+'''
+__author__ = {
+				'name':'Mos', 
+				'mail':'acwzy@qq.com',
+				'version':'beta7',
+				'date':'2016-03-29'}
+
+
+
 import urllib.request
 import urllib.parse
 from urllib.error import URLError
@@ -7,7 +18,7 @@ import json
 # import random
 from tkinter import *
 import os
-
+import dictionary
 #TODO:1. add a username √; 2. add a text version √ ;3. add a local dictionary √; 4. add the translating history; 5. if words in history, return a joke； 6. add a huge dict
 
 #判断文件是否存在
@@ -31,17 +42,23 @@ else:
 		w.close()
 	user = '' # 不存在则令用户名为空
 
-with open('dictionary.txt','r', encoding='utf8') as d:
-	lines = d.read().split('\n')
-	d.close()
-dictionary = {}
-for x in range(0, len(lines)):
-	a = lines[x].split('   ')[0]
-	b = lines[x].split('   ')[1]
-	if a in dictionary.keys():
-		dictionary[a] = dictionary[a] + ' ' + b
+# with open('dictionary.txt','r', encoding='utf8') as d:
+	# lines = d.read().split('\n')
+	# d.close()
+dict0 = {}
+# for x in range(0, len(lines)):
+	# a = lines[x].split('   ')[0]
+	# b = lines[x].split('   ')[1]
+	# if a in dict0.keys():
+		# dict0[a] = dict0[a] + ' ' + b
+	# else:
+		# dict0[a] = b
+dict1 = dictionary.dictionary
+for i in dict1:
+	if i[0] in dict0.keys():
+		dict0[i[0]] = dict0[i[0]] + ' [计]' + i[1]
 	else:
-		dictionary[a] = b
+		dict0[i[0]] = i[1]
 		
 		
 p = 0
@@ -58,8 +75,8 @@ def langseletion():	#语言选择窗口
 		# Button(lang, text='OK~', command=lang.destroy).pack()
 
 def local(word):	#本地查询功能
-	if word in dictionary.keys():
-		return dictionary[word]
+	if word in dict0.keys():
+		return dict0[word]
 	else:
 		return '%s' % version[0]
 
