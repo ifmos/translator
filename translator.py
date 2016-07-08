@@ -127,7 +127,7 @@ def words(event=None):	#单词翻译
 		html = response.read().decode('utf8')
 
 		target = json.loads(html)
-		target = target['translateResult'][0][0]['tgt']
+		target = ''.join(target['smartResult']['entries'])
 
 		text2.set(target)
 	
@@ -147,12 +147,10 @@ def paras():	#段落翻译
 
 		target = json.loads(html)
 		# target = target['translateResult'][0][0]['tgt']
-		cloum=1
 		if target.__contains__('translateResult'):
 			for i in target['translateResult']:
 				for j in i:
 					text4.insert(INSERT,j['tgt'] + '\n')
-					cloum+=1
 		else:
 			text4.insert(INSERT, '%s' % version[3])
 		# text4.insert(INSERT, target)
